@@ -1,49 +1,73 @@
 //gmSession.js - This class is to handle a session instance on the guerilla mail server.
-var rp = require('request-promise');
-let baseUrl = "http://api.guerrillamail.com/ajax.php";
+const axios = require('axios');
+const axiosInstance = axios.create({
+    baseURL: "http://api.guerrillamail.com/",
+    timeout: 1000,
+    //headers: {}
+})
 
 class gmSession {
-    constructor(emailUser, domain="sharklasers.com") {
-        this.email = emailUser;
-        this.domain = domain;
+    constructor(emailUser = undefined) {
+        this.user = emailUser;
+        this.domain = "sharklasers.com";
         this.sid;
-
-        rp({
-            method: 'GET',
-            uri: 'http://api.guerrillamail.com/ajax.php?f=get_email_address',
-            json: true,
-            resolveWithFullResponse: true
-        }).then((response) => {
-            this.sid = response.body.sid_token
-            rp({
-                method: 'POST',
-                uri: `http://api.guerrillamail.com/ajax.php?f=set_email_user&sid_token=${this.sid}&email_user=${this.email}@${this.domain}`,
-                json: true,
-                resolveWithFullResponse: true
-            })
-        }).catch((err) => {
-            console.log('Could not connect to the guerilla mail server...')
-        })
     }
 
-    establishSession = (sid_token = 0) => {
+    async establishSession(sid_token = null) {
         let url;
-        sid_token == 0 ? url = `${baseUrl}?f=get_email_address&site=${this.domain}` : url = `${baseUrl}?f=get_email_address&sid_token=${this.sid}&site=${this.domain}`;
-        rp({
-            method: 'GET',
-            uri: url,
-            json: true,
-            resolveWithFullResponse: true
-        }).then((response) => {
-            this.sid = response.body.sid_token;
-            return response.body.sid_token;
-        })
+        sid_token === null ? url = `ajax.php?f=get_email_address` : url = `ajax.php?f=get_email_address&sid_token=${sid_token}`;
+        try {
+            let response = await axiosInstance.get(url)
+            console.log(`SID => ${this.sid} USER => ${this.user}`)
+            if (response.status !== 200) {
+                throw "Status code: " + response.status;
+            }
+            this.sid = await response.data.sid_token;
+            if (this.user === undefined) {
+                this.user = await response.data.email_addr.split('@')[0];
+            } else {
+                await this.setEmail(this.user)
+            }
+        } catch (err) {
+            console.log('Could not connect to the guerilla mail server: ' + err)
+        }
+        return this.sid;
+    }
+
+    async setEmail(emailUser) {
+        let url = `ajax.php?f=set_email_user&email_user=${emailUser}&sid_token=${this.sid}`;
+        try {
+            let response = await axiosInstance.post(url)
+            if (response.status !== 200) {
+                throw "Status code: " + response.status;
+            }
+            console.log(response);
+            this.user = await response.data.email_addr.split('@')[0];
+        } catch (err) {
+            console.log('Could not email User: ' + err)
+        }
+        console.log(this.user)
+        return this.user
+    }
+
+    checkEmail = () => {
 
     }
 
-    setEmail = (emailUser, domain = "sharklasers.com") => {
-        let url = `${baseUrl}?f=set_email_user&email_user=${emailUser}&sid_token=${this.sid}&site=${domain}`;
-        
+    waitForSpecificEmail = (senderAddress) => {
+
+    }
+
+    fetchEmail = (emailID) => {
+        let url = `ajax.php?f=fetch_email&email_id=${emailID}`
+    }
+
+    getEmailAddr() {
+        return this.user + '@' + this.domain;
+    }
+
+    getSid() {
+        return this.sid;
     }
 }
 
