@@ -15,5 +15,10 @@ describe('Verify the guerilla mail API is functioning as intended', () => {
         expect(response.data).toBeDefined()
         console.log(response.data);
     })
+    it('Should be able to get a response from the get_email_address endpoint using a promise', () => {
+        return axiosInstance.get('ajax.php?f=get_email_address').then((response) => {
+            expect(response.data).toBeDefined()
+        })
+    })
 
 })

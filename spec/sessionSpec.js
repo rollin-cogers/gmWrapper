@@ -5,19 +5,25 @@ describe('Test the gmSession module: ', () => {
         let session = new gmSession();
         expect(session).toBeInstanceOf(gmSession);
     })
-    it('Establishing a new session without arguments should give a random email', () => {
+    it('Establishing a new session without arguments should give a random email', async () => {
         let session = new gmSession();
-        session.establishSession();
+        await session.establishSession();
         expect(session.getEmailAddr()).not.toContain('undefined');
     })
-    it('Creating a new session should set the sid for the session', () => {
+    it('Creating a new session should set the sid for the session', async () => {
         let session = new gmSession();
-        session.establishSession();
+        await session.establishSession();
         expect(session.getSid()).toBeDefined();
     })
-    it('Creating a new session with a string argument should set that as the email', () => {
+    it('Creating a new session with a string argument should set that as the email', async () => {
         let session = new gmSession('newUser');
-        session.establishSession();
+        await session.establishSession();
         expect(session.getEmailAddr()).toContain('newUser');
+    })
+    it('Should be able to set an email manually', async () => {
+        let session = new gmSession();
+        await session.establishSession();
+        await session.setEmail('testUser')
+        expect(session.getEmailAddr()).toContain('testUser');
     })
 })

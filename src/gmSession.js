@@ -13,41 +13,37 @@ class gmSession {
         this.sid;
     }
 
-    async establishSession(sid_token = null) {
+    establishSession(sid_token = null) {
         let url;
         sid_token === null ? url = `ajax.php?f=get_email_address` : url = `ajax.php?f=get_email_address&sid_token=${sid_token}`;
-        try {
-            let response = await axiosInstance.get(url)
-            console.log(`SID => ${this.sid} USER => ${this.user}`)
+        return axiosInstance.get(url).then((response) => {
             if (response.status !== 200) {
                 throw "Status code: " + response.status;
             }
-            this.sid = await response.data.sid_token;
+            this.sid = response.data.sid_token;
             if (this.user === undefined) {
-                this.user = await response.data.email_addr.split('@')[0];
+                this.user = response.data.email_addr.split('@')[0];
             } else {
-                await this.setEmail(this.user)
+                return this.setEmail(this.user)
             }
-        } catch (err) {
-            console.log('Could not connect to the guerilla mail server: ' + err)
-        }
-        return this.sid;
+        })//.catch((err) => {
+            //console.log('Could not connect to the guerilla mail server: ' + err)
+        /*})*/.finally(() => {
+            return this.sid;
+        })
     }
 
-    async setEmail(emailUser) {
+    setEmail(emailUser) {
         let url = `ajax.php?f=set_email_user&email_user=${emailUser}&sid_token=${this.sid}`;
-        try {
-            let response = await axiosInstance.post(url)
+        return axiosInstance.post(url).then((response) => {
             if (response.status !== 200) {
                 throw "Status code: " + response.status;
             }
-            console.log(response);
-            this.user = await response.data.email_addr.split('@')[0];
-        } catch (err) {
-            console.log('Could not email User: ' + err)
-        }
-        console.log(this.user)
-        return this.user
+            this.user = response.data.email_addr.split('@')[0];
+            return this.user
+        })//.catch((err) => {
+        //     console.log('Could not set user email: ' + err);
+        // })
     }
 
     checkEmail = () => {
@@ -58,8 +54,29 @@ class gmSession {
 
     }
 
-    fetchEmail = (emailID) => {
+    fetchEmail(emailID) {
         let url = `ajax.php?f=fetch_email&email_id=${emailID}`
+    }
+
+    sendEmail(recipient, subject, body) {
+        let url = 'ajax.php'
+        return axiosInstance.post(url, {
+            data: {
+                to: recipient,
+                from: this.getEmailAddr(),
+                subject: subject,
+                body: body,
+                ref_mind: "",
+                attach: "",
+                site: "", //This might be required
+                in: "" //This might be required
+            }
+        }).then((response) => {
+            if (response.status !== 200) {
+                throw "Status code: " + response.status;
+            }
+        })
+
     }
 
     getEmailAddr() {
