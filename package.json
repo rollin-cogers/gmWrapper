@@ -17,10 +17,12 @@
   },
   "homepage": "https://github.com/rollin-cogers/gmWrapper#readme",
   "dependencies": {
-    "axios": "0.19.2"
+    "axios": "0.19.2",
+    "form-data": "^3.0.0"
   },
   "devDependencies": {
     "jasmine": "^3.5.0",
-    "jasmine-spec-reporter": "^4.2.1"
+    "jasmine-spec-reporter": "^4.2.1",
+    "lodash": "^4.17.15"
   }
 }

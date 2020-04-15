@@ -12,8 +12,8 @@ describe('Verify the guerilla mail API is functioning as intended', () => {
     })
     it('Should be able to get a response from the get_email_address endpoint', async () => {
         let response  = await axiosInstance.get('ajax.php?f=get_email_address')
-        expect(response.data).toBeDefined()
-        console.log(response.data);
+        expect(response.data).not.toEqual("")
+        //console.log(response.data);
     })
     it('Should be able to get a response from the get_email_address endpoint using a promise', () => {
         return axiosInstance.get('ajax.php?f=get_email_address').then((response) => {
