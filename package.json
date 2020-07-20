@@ -23,6 +23,6 @@
   "devDependencies": {
     "jasmine": "^3.5.0",
     "jasmine-spec-reporter": "^4.2.1",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.19"
   }
 }
